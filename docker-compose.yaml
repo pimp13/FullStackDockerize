@@ -64,6 +64,6 @@ networks:
   crud_net:
     driver: bridge
 
-include:
-  - backend/docker-compose.yaml
-  - frontend/docker-compose.yaml
+# include:
+#   - backend/docker-compose.yaml
+#   - frontend/docker-compose.yaml

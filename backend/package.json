@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "dev": "nodemon --legacy-watch index.js"
+    "dev": "nodemon --legacy-watch index.js"
   },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
     "express": "^5.2.1",
     "mongoose": "^9.10.2"
   },

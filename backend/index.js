@@ -1,16 +1,25 @@
-// server.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
+
+// ---------- Middleware ----------
+app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
 
-// اتصال به دیتابیس
-mongoose.connect('mongodb://127.0.0.1:27017/cruddb')
+// ---------- Config از env ----------
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const MONGO_URI = process.env.MONGO_URI;
+
+// ---------- اتصال به دیتابیس ----------
+mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// اسکیمای کاربر
+// ---------- اسکیمای کاربر ----------
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
@@ -19,9 +28,9 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// ==================== CRUD ====================
+// ---------- CRUD ----------
 
-// CREATE - ایجاد کاربر جدید
+// CREATE
 app.post('/users', async (req, res) => {
   try {
     const user = await User.create(req.body);
@@ -31,7 +40,7 @@ app.post('/users', async (req, res) => {
   }
 });
 
-// READ - دریافت همه کاربران
+// READ all
 app.get('/users', async (req, res) => {
   try {
     const users = await User.find();
@@ -41,7 +50,7 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// READ - دریافت یک کاربر با id
+// READ one
 app.get('/users/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -52,7 +61,7 @@ app.get('/users/:id', async (req, res) => {
   }
 });
 
-// UPDATE - بروزرسانی کاربر
+// UPDATE
 app.put('/users/:id', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -66,7 +75,7 @@ app.put('/users/:id', async (req, res) => {
   }
 });
 
-// DELETE - حذف کاربر
+// DELETE
 app.delete('/users/:id', async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -77,8 +86,12 @@ app.delete('/users/:id', async (req, res) => {
   }
 });
 
-// شروع سرور
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', env: NODE_ENV });
+});
+
+// ---------- شروع سرور ----------
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT} [${NODE_ENV}]`);
 });

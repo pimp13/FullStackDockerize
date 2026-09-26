@@ -1,10 +1,23 @@
+name: fullstackapp-frontend-dev
+
 services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: crud-frontend:prod
-    container_name: crud_frontend
+      dockerfile: Dockerfile.dev
+    image: crud-frontend:dev
+    container_name: crud_frontend_dev
+    environment:
+      - VITE_API_URL=http://localhost:3000
     ports:
-      - "80:80"
-    restart: unless-stopped
+      - "5173:5173"
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true
+    name: fullstackapp_shared

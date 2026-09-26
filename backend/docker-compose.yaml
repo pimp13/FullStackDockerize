@@ -1,48 +1,65 @@
+name: fullstackapp-backend-dev
+
 services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: crud-backend:prod
-    container_name: crud_backend
+      dockerfile: Dockerfile.dev
+    image: crud-backend:dev
+    container_name: crud_backend_dev
+    env_file:
+      - ./src/.env
     environment:
-      - NODE_ENV=production
-      - MONGO_URI=mongodb://admin:secret@mongo:27017/cruddb?authSource=admin
+      - NODE_ENV=development
       - PORT=3000
+      - MONGO_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - /app/node_modules
     depends_on:
       - mongo
-    restart: unless-stopped
     networks:
-      - backend_net
+      - shared
+      - backend_internal
 
   mongo:
     image: mongo:7
-    container_name: crud_mongo
+    container_name: crud_mongo_dev
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=secret
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS}
+    ports:
+      - "${MONGO_PORT}:27017"
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_dev:/data/db
     networks:
-      - backend_net
+      - backend_internal
 
   mongo-express:
     image: mongo-express:1.0.2
-    container_name: crud_mongo_express
+    container_name: crud_mongo_express_dev
     environment:
-      - ME_CONFIG_MONGODB_URL=mongodb://admin:secret@mongo:27017/
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=pass
+      - ME_CONFIG_MONGODB_URL=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASS}@mongo:27017/
+      - ME_CONFIG_BASICAUTH_USERNAME=${ME_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${ME_PASS}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_SITE_BASEURL=/
     ports:
-      - "8081:8081"
+      - "${MONGO_EXPRESS_PORT}:8081"
     depends_on:
       - mongo
     networks:
-      - backend_net
+      - backend_internal
 
 volumes:
-  mongo_data:
+  mongo_data_dev:
 
 networks:
-  backend_net:
+  backend_internal:
     driver: bridge
+  shared:
+    external: true
+    name: fullstackapp_shared

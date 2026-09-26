@@ -1,0 +1,17 @@
+FROM node:24.18.0-alpine
+
+WORKDIR /app
+
+# نصب nodemon برای hot reload
+RUN npm install -g nodemon
+
+# package files
+COPY package*.json ./
+
+# همه dependency ها (شامل devDependencies)
+RUN npm install
+
+# سورس کد کپی نمی‌شه چون از volume mount میاد (hot reload)
+
+EXPOSE 3000
+CMD ["nodemon", "--legacy-watch", "server.js"]

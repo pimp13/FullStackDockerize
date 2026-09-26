@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crud-backend:prod
+    container_name: crud_backend
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://admin:secret@mongo:27017/cruddb?authSource=admin
+      - PORT=3000
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - backend_net
+
+  mongo:
+    image: mongo:7
+    container_name: crud_mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend_net
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: crud_mongo_express
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:secret@mongo:27017/
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=pass
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - backend_net
+
+volumes:
+  mongo_data:
+
+networks:
+  backend_net:
+    driver: bridge

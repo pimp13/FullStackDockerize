@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crud-frontend:prod
+    container_name: crud_frontend
+    ports:
+      - "80:80"
+    restart: unless-stopped
